@@ -86,7 +86,9 @@ public class HomeWorkApp_1_3 {
         System.out.println("#8");
         int[] array8 = {1, 5, 47, 1, -98, 0, -7};
         System.out.println(Arrays.toString(array8));
-        System.out.println(Arrays.toString(getShiftedArray(array8,1)));
+        System.out.println(Arrays.toString(getShiftedArray(array8, 0)));
+        System.out.println(Arrays.toString(getShiftedArray(array8, 2)));
+        System.out.println(Arrays.toString(getShiftedArray(array8, -2)));
         System.out.println();
     }
 
@@ -137,14 +139,14 @@ public class HomeWorkApp_1_3 {
     //Реализация задания №8
     public static int[] getShiftedArray(int[] arr, int n) {
 
-        //Проверка на массив из 1 значения.
-        // Его сдвигать не надо, сразу возвращаю
-        if (arr.length == 1) {
+        //Проверка на массив из 1 значения или нулевой сдвиг
+        // Массив сдвигать не надо, сразу возвращаю
+        if (arr.length == 1 || n == 0) {
             return arr;
         }
 
         //Смещение массива на 1 символ через буферную int переменную,
-        // повтор смещения через рекурсию, если n > 1
+        // повтор смещения через рекурсию, если по модулю |n| > 1
         if (n > 0) {
             int buffer = arr[0];
             arr[0] = arr[arr.length - 1];
@@ -154,7 +156,13 @@ public class HomeWorkApp_1_3 {
             arr[1] = buffer;
             return getShiftedArray(arr, n - 1);
         } else {
-            return arr;
+            int buffer = arr[arr.length - 1];
+            arr[arr.length - 1] = arr[0];
+            for (int i = 0; i <= arr.length - 2; i++) {
+                arr[i] = arr[i + 1];
+            }
+            arr[arr.length - 2] = buffer;
+            return getShiftedArray(arr, n + 1);
         }
     }
 }
