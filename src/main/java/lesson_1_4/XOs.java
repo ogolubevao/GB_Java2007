@@ -25,9 +25,6 @@ public class XOs {
     //Рандом
     public static final Random RANDOM = new Random();
 
-    //Координаты точки для блокировки хода человека
-    public static String[] aimArr;
-
     /**
      * Проинициализировать поле.
      */
@@ -73,6 +70,108 @@ public class XOs {
      * Ход робота
      */
     public static void aiTurn() {
+        //Робот ищет последовательность Х размером DOTS_TO_WIN-1 подряд, чтобы заблокировать ход с края
+
+        //строки
+        int count;
+        for (int i = 0; i < map.length; i++) {
+            count = 0;
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] == DOT_X) {
+                    count++;
+                    if ((j + 1) < map[i].length && count == (DOTS_TO_WIN - 1)  && map[i][j + 1] == DOT_EMPTY) {
+                        System.out.println("Робот делает ход в " + (j + 2) + " " + (i + 1));
+                        map[i][j + 1] = DOT_0;
+                        return;
+                    } else if ((j - count) >= 0 && count == (DOTS_TO_WIN - 1) && map[i][j - count] == DOT_EMPTY) {
+                        System.out.println("Робот делает ход в " + (j - count + 1) + " " + (i + 1));
+                        map[i][j - count] = DOT_0;
+                        return;
+                    }
+                } else {
+                    count = 0;
+                }
+            }
+        }
+
+
+
+        //столбцы
+        for (int j = 0; j < SIZE; j++) { //столбец
+            count = 0;
+            for (int i = 0; i < map.length; i++) {  // строка
+                if (map[i][j] == DOT_X) {
+                    count++;
+                    if ((i + 1) < map.length && count == (DOTS_TO_WIN - 1)  && map[i + 1][j] == DOT_EMPTY) {
+                        System.out.println("Робот делает ход в " + (j + 1) + " " + (i + 2));
+                        map[i + 1][j] = DOT_0;
+                        return;
+                    } else if ((i - count) >= 0 && count == (DOTS_TO_WIN - 1) && map[i - count][j] == DOT_EMPTY) {
+                        System.out.println("Робот делает ход в " + (j + 1) + " " + (i - count + 1));
+                        map[i - count][j] = DOT_0;
+                        return;
+                    }
+                } else {
+                    count = 0;
+                }
+            }
+        }
+
+
+        //диагонали слева направо 1
+        int diagonalCount = SIZE - DOTS_TO_WIN;
+        for (int dc = -diagonalCount; dc <= diagonalCount; dc++) {
+            count = 0;
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[i].length; j++) {
+                    if ((i - j + dc) == 0 && ((dc <= 0 && (i - j) >= 0) || ((dc > 0 && (j - i) > 0)))) {
+                        if (map[i][j] == DOT_X) {
+                            count++;
+                            if ((i + 1) < map.length && (j + 1) < map[i].length && count == (DOTS_TO_WIN - 1)  && map[i + 1][j + 1] == DOT_EMPTY) {
+                                System.out.println("Робот делает ход в " + (j + 2) + " " + (i + 2));
+                                map[i + 1][j + 1] = DOT_0;
+                                return;
+                            } else if ((i - count) >= 0 && (j - count) >= 0 && count == (DOTS_TO_WIN - 1) && map[i - count][j - count] == DOT_EMPTY) {
+                                System.out.println("Робот делает ход в " + (j - count + 1) + " " + (i - count + 1));
+                                map[i - count][j - count] = DOT_0;
+                                return;
+                            }
+                        } else {
+                            count = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        //диагонали справа налево 2
+        for (int dc = -diagonalCount; dc <= diagonalCount; dc++) {
+            count = 0;
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[i].length; j++) {
+                    if ((i + j) == (SIZE - 1 + dc)) {
+                        if (map[i][j] == DOT_X) {
+                            count++;
+                            if ((i + 1) < map.length && (j - 1) >= 0 && count == (DOTS_TO_WIN - 1)  && map[i + 1][j - 1] == DOT_EMPTY) {
+                                System.out.println("Робот делает ход в " + j + " " + (i + 2));
+                                map[i + 1][j - 1] = DOT_0;
+                                return;
+                            } else if ((i - count) >= 0 && (j + count) < map[i].length && count == (DOTS_TO_WIN - 1) && map[i - count][j + count] == DOT_EMPTY) {
+                                System.out.println("Робот делает ход в " + (j + count + 1) + " " + (i - count + 1));
+                                map[i - count][j + count] = DOT_0;
+                                return;
+                            }
+                        } else {
+                            count = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        //Если робот не нашёл возможности заблокировать ход, ходит рандомно
         int x, y;
 
         do {
@@ -125,10 +224,10 @@ public class XOs {
         }
 
         //столбцы
-        for (int i = 0; i < map.length; i++) {
+        for (int j = 0; j < SIZE; j++) {
             count = 0;
-            for (int j = 0; j < map[i].length; j++) {
-                if (map[j][i] == symbol) {
+            for (int i = 0; i < map.length; i++) {
+                if (map[i][j] == symbol) {
                     count++;
                     if (count == DOTS_TO_WIN) {
                         return true;
@@ -139,35 +238,41 @@ public class XOs {
             }
         }
 
-        //диагональ 1
-        count = 0;
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                if (i == j) {
-                    if (map[i][j] == symbol) {
-                        count++;
-                        if (count == DOTS_TO_WIN) {
-                            return true;
+        //диагонали слева направо
+        int diagonalCount = SIZE - DOTS_TO_WIN;
+        for (int dc = -diagonalCount; dc <= diagonalCount; dc++) {
+            count = 0;
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[i].length; j++) {
+                    if ((i - j + dc) == 0 && ((dc <= 0 && (i - j) >= 0) || ((dc > 0 && (j - i) > 0)))) {
+                        if (map[i][j] == symbol) {
+                            count++;
+                            if (count == DOTS_TO_WIN) {
+                                return true;
+                            }
+                        } else {
+                            count = 0;
                         }
-                    } else {
-                        count = 0;
                     }
                 }
             }
         }
 
-        //диагональ 2
-        count = 0;
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                if ((i + j) == (SIZE - 1)) {
-                    if (map[i][j] == symbol) {
-                        count++;
-                        if (count == DOTS_TO_WIN) {
-                            return true;
+
+        //диагонали справа налево
+        for (int dc = -diagonalCount; dc <= diagonalCount; dc++) {
+            count = 0;
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[i].length; j++) {
+                    if ((i + j) == (SIZE - 1 + dc)) {
+                        if (map[i][j] == symbol) {
+                            count++;
+                            if (count == DOTS_TO_WIN) {
+                                return true;
+                            }
+                        } else {
+                            count = 0;
                         }
-                    } else {
-                        count = 0;
                     }
                 }
             }
